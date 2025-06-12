@@ -76,12 +76,21 @@ public class Magazyn {
         Produkt.wypiszListe(produkty);
     }
 
+    /**
+     * Usuwa produkt z magazynu na podstawie jego kodu.
+     * @param scanner Obiekt do wczytywania danych od użytkownika.
+     */
+
     public void usunProdukt(Scanner scanner) {
         System.out.print("Kod produktu do usunięcia: ");
         String kod = scanner.nextLine();
         boolean usunieto = produkty.removeIf(p -> p.getKod().equals(kod));
         System.out.println(usunieto ? "🗑️ Usunięto." : "❌ Nie znaleziono.");
     }
+
+    /**
+     * Zapisuje listę produktów do pliku.
+     */
 
     public void zapiszDoPliku() {
         String sciezka = Config.get("raport.sciezka"); // czytaj z config.properties
@@ -92,6 +101,10 @@ public class Magazyn {
             System.out.println("❌ Błąd zapisu: " + e.getMessage());
         }
     }
+
+    /**
+     * Wczytuje produkty z pliku JSON i aktualizuje stan magazynu.
+     */
 
     public void wczytajZPliku() {
         if (!plik.exists()) {
@@ -108,6 +121,11 @@ public class Magazyn {
         }
     }
 
+    /**
+     * Wyszukuje produkty pasujące do podanej frazy (nazwa, kod, opis, dostawca).
+     * @param scanner Obiekt do wczytywania danych od użytkownika.
+     */
+
     public void wyszukaj(Scanner scanner) {
         System.out.print("Wpisz szukaną frazę: ");
         String fraza = scanner.nextLine();
@@ -115,6 +133,11 @@ public class Magazyn {
                 .filter(p -> p.pasujeDoWyszukiwania(fraza))
                 .forEach(System.out::println);
     }
+
+    /**
+     * Sortuje listę produktów według wybranego kryterium.
+     * @param scanner Obiekt do wczytywania danych od użytkownika.
+     */
 
     public void sortuj(Scanner scanner) {
         System.out.println("Sortuj po: 1-nazwa, 2-kod, 3-cena, 4-ilość");
@@ -134,11 +157,21 @@ public class Magazyn {
         }
     }
 
+    /**
+     * Wyświetla listę produktów, których ilość jest mniejsza niż określone minimum.
+     */
+
+
     public void pokazNiskieStany() {
         produkty.stream()
                 .filter(Produkt::czyPonizejMinimum)
                 .forEach(p -> System.out.println("🔔 " + p.getNazwa() + " (" + p.getIlosc() + " < " + p.getMinimum() + ")"));
     }
+
+    /**
+     * Przyjmuje dostawę danego produktu, aktualizując jego ilość i zapisując transakcję.
+     * @param scanner Obiekt do wczytywania danych od użytkownika.
+     */
 
     public void przyjmijDostawę(Scanner scanner) {
         System.out.print("Podaj kod produktu: ");
@@ -173,12 +206,22 @@ public class Magazyn {
         }
     }
 
+    /**
+     * Wyszukuje produkt po jego kodzie.
+     * @param kod Kod produktu.
+     * @return Obiekt Produkt lub null jeśli nie znaleziono.
+     */
+
     private Produkt znajdzProdukt(String kod) {
         return produkty.stream()
                 .filter(p -> p.getKod().equalsIgnoreCase(kod))
                 .findFirst()
                 .orElse(null);
     }
+
+    /**
+     * Generuje raport zawierający wszystkie produkty i historię transakcji.
+     */
 
     public void generujRaport() {
         try (FileWriter writer = new FileWriter("raport.txt")) {
@@ -195,6 +238,10 @@ public class Magazyn {
             System.out.println("❌ Błąd zapisu raportu: " + e.getMessage());
         }
     }
+
+    /**
+     * Wyświetla powiadomienia o produktach poniżej minimalnego stanu magazynowego.
+     */
 
     public void wyswietlPowiadomienia() {
         boolean znaleziono = false;
