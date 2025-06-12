@@ -13,12 +13,12 @@ public class Config {
     static {
         try (InputStream input = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (input == null) {
-                System.err.println("❌ Nie znaleziono pliku config.properties!");
+                System.err.println("Nie znaleziono pliku config.properties!");
             } else {
                 properties.load(input);
             }
         } catch (IOException e) {
-            System.err.println("❌ Błąd podczas ładowania konfiguracji: " + e.getMessage());
+            System.err.println("Błąd podczas ładowania konfiguracji: " + e.getMessage());
         }
     }
 

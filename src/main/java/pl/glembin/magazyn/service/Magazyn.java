@@ -61,7 +61,7 @@ public class Magazyn {
         p.setIlosc(Integer.parseInt(scanner.nextLine()));
 
         produkty.add(p);
-        System.out.println("✅ Produkt dodany.");
+        System.out.println("Produkt dodany.");
     }
 
     /**
@@ -85,7 +85,7 @@ public class Magazyn {
         System.out.print("Kod produktu do usunięcia: ");
         String kod = scanner.nextLine();
         boolean usunieto = produkty.removeIf(p -> p.getKod().equals(kod));
-        System.out.println(usunieto ? "🗑️ Usunięto." : "❌ Nie znaleziono.");
+        System.out.println(usunieto ? "Usunięto." : "Nie znaleziono.");
     }
 
     /**
@@ -96,9 +96,9 @@ public class Magazyn {
         String sciezka = Config.get("raport.sciezka"); // czytaj z config.properties
         try {
             mapper.writeValue(new File(sciezka), produkty);
-            System.out.println("💾 Zapisano do pliku: " + sciezka);
+            System.out.println("Zapisano do pliku: " + sciezka);
         } catch (IOException e) {
-            System.out.println("❌ Błąd zapisu: " + e.getMessage());
+            System.out.println("Błąd zapisu: " + e.getMessage());
         }
     }
 
@@ -115,9 +115,9 @@ public class Magazyn {
             List<Produkt> wczytane = mapper.readValue(plik, new TypeReference<>() {});
             produkty.clear();
             produkty.addAll(wczytane);
-            System.out.println("📂 Wczytano.");
+            System.out.println("Wczytano.");
         } catch (IOException e) {
-            System.out.println("❌ Błąd odczytu: " + e.getMessage());
+            System.out.println("Błąd odczytu: " + e.getMessage());
         }
     }
 
@@ -151,9 +151,9 @@ public class Magazyn {
         };
         if (komparator != null) {
             produkty.sort(komparator);
-            System.out.println("🔃 Posortowano.");
+            System.out.println("Posortowano.");
         } else {
-            System.out.println("❌ Nieznane kryterium.");
+            System.out.println("Nieznane kryterium.");
         }
     }
 
@@ -178,14 +178,14 @@ public class Magazyn {
         String kod = scanner.nextLine();
         Produkt produkt = znajdzProdukt(kod);
         if (produkt == null) {
-            System.out.println("❌ Nie znaleziono produktu.");
+            System.out.println("Nie znaleziono produktu.");
             return;
         }
         System.out.print("Ilość przyjęcia: ");
         int ile = Integer.parseInt(scanner.nextLine());
         produkt.przyjmij(ile);
         historia.add(new Transakcja(LocalDate.now(), kod, ile, TypTransakcji.PRZYJECIE));
-        System.out.println("✅ Przyjęto dostawę.");
+        System.out.println("Przyjęto dostawę.");
     }
 
     public void wydajTowar(Scanner scanner) {
@@ -193,16 +193,16 @@ public class Magazyn {
         String kod = scanner.nextLine();
         Produkt produkt = znajdzProdukt(kod);
         if (produkt == null) {
-            System.out.println("❌ Nie znaleziono produktu.");
+            System.out.println("Nie znaleziono produktu.");
             return;
         }
         System.out.print("Ilość do wydania: ");
         int ile = Integer.parseInt(scanner.nextLine());
         if (produkt.wydaj(ile)) {
             historia.add(new Transakcja(LocalDate.now(), kod, ile, TypTransakcji.WYDANIE));
-            System.out.println("✅ Wydano towar.");
+            System.out.println("Wydano towar.");
         } else {
-            System.out.println("❌ Brak wystarczającej ilości.");
+            System.out.println("Brak wystarczającej ilości.");
         }
     }
 
@@ -233,9 +233,9 @@ public class Magazyn {
             for (Transakcja t : historia) {
                 writer.write(t + "\n");
             }
-            System.out.println("📄 Raport zapisany do 'raport.txt'");
+            System.out.println("Raport zapisany do 'raport.txt'");
         } catch (IOException e) {
-            System.out.println("❌ Błąd zapisu raportu: " + e.getMessage());
+            System.out.println("Błąd zapisu raportu: " + e.getMessage());
         }
     }
 
@@ -252,7 +252,7 @@ public class Magazyn {
             }
         }
         if (!znaleziono) {
-            System.out.println("✅ Wszystkie produkty powyżej minimalnego stanu.");
+            System.out.println("Wszystkie produkty powyżej minimalnego stanu.");
         }
     }
     public void edytujProdukt(Scanner scanner) {
@@ -260,7 +260,7 @@ public class Magazyn {
         String kod = scanner.nextLine();
         Produkt p = znajdzProdukt(kod);
         if (p == null) {
-            System.out.println("❌ Nie znaleziono produktu.");
+            System.out.println("Nie znaleziono produktu.");
             return;
         }
 
@@ -285,7 +285,7 @@ public class Magazyn {
         if (!noweMinimum.isBlank()) p.setMinimum(Integer.parseInt(noweMinimum));
 
         logger.info("Edytowano produkt: {}", kod);
-        System.out.println("✅ Zaktualizowano dane produktu.");
+        System.out.println("Zaktualizowano dane produktu.");
     }
 
     /**
@@ -312,9 +312,9 @@ public class Magazyn {
      */
     public void generujRaportAsynchronicznie() {
         new Thread(() -> {
-            logger.info("⏳ Rozpoczęto asynchroniczne generowanie raportu...");
+            logger.info("Rozpoczęto asynchroniczne generowanie raportu...");
             generujRaport();
-            logger.info("✅ Zakończono generowanie raportu (async).");
+            logger.info("Zakończono generowanie raportu (async).");
         }).start();
     }
 

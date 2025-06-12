@@ -1,2 +1,9 @@
 === RAPORT PRODUKTÓW ===
+Produkt: test (01) - 5.0 zł/km
+Opis: test
+Kategoria: tesciki
+Ilość: 2
+Minimum: 3
+Dostawca: andrzej, , 5052
+
 === HISTORIA TRANSAKCJI ===

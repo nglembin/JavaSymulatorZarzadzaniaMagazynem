@@ -69,7 +69,7 @@ public class Main {
                     String kod = scanner.nextLine();
                     Produkt znaleziony = db.znajdzProdukt(kod);
                     if (znaleziony != null) System.out.println(znaleziony);
-                    else System.out.println("❌ Nie znaleziono.");
+                    else System.out.println("Nie znaleziono.");
                 }
                 case "18" -> {
                     System.out.print("Podaj kod produktu do usunięcia: ");
@@ -82,10 +82,10 @@ public class Main {
                     else lista.forEach(System.out::println);
                 }
                 case "0" -> {
-                    System.out.println("👋 Do widzenia!");
+                    System.out.println("Do widzenia!");
                     trwa = false;
                 }
-                default -> System.out.println("❌ Nieprawidłowa opcja!");
+                default -> System.out.println("Nieprawidłowa opcja!");
             }
         }
     }
