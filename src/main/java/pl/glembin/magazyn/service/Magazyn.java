@@ -33,16 +33,30 @@ public class Magazyn {
     public void dodajProdukt(Scanner scanner) {
         System.out.print("Nazwa: ");
         String nazwa = scanner.nextLine();
+
         System.out.print("Kod: ");
         String kod = scanner.nextLine();
+
+        // Sprawdzenie, czy produkt o takim kodzie już istnieje
+        for (Produkt istniejący : produkty) {
+            if (istniejący.getKod().equalsIgnoreCase(kod)) {
+                System.out.println("❌ Produkt o takim kodzie już istnieje!");
+                return;
+            }
+        }
+
         System.out.print("Cena: ");
         double cena = Double.parseDouble(scanner.nextLine());
+
         System.out.print("Jednostka: ");
         String jednostka = scanner.nextLine();
+
         System.out.print("Opis: ");
         String opis = scanner.nextLine();
+
         System.out.print("Kategoria: ");
         String kategoria = scanner.nextLine();
+
         System.out.print("Minimalna ilość (powiadomienie): ");
         int minimum = Integer.parseInt(scanner.nextLine());
 
@@ -57,11 +71,12 @@ public class Magazyn {
 
         Produkt p = new Produkt(nazwa, kod, cena, jednostka, opis, kategoria, d);
         p.setMinimum(minimum);
+
         System.out.print("Ilość początkowa: ");
         p.setIlosc(Integer.parseInt(scanner.nextLine()));
 
         produkty.add(p);
-        System.out.println("Produkt dodany.");
+        System.out.println("✅ Produkt dodany.");
     }
 
     /**
