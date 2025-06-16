@@ -27,56 +27,16 @@ public class Magazyn {
 
     /**
      * Dodaje nowy produkt do magazynu wraz z danymi dostawcy i minimalną ilością.
-     * @param scanner Obiekt do wczytywania danych od użytkownika.
      */
 
-    public void dodajProdukt(Scanner scanner) {
-        System.out.print("Nazwa: ");
-        String nazwa = scanner.nextLine();
-
-        System.out.print("Kod: ");
-        String kod = scanner.nextLine();
-
-        // Sprawdzenie, czy produkt o takim kodzie już istnieje
+    public boolean dodajProdukt(Produkt produkt) {
         for (Produkt istniejący : produkty) {
-            if (istniejący.getKod().equalsIgnoreCase(kod)) {
-                System.out.println("❌ Produkt o takim kodzie już istnieje!");
-                return;
+            if (istniejący.getKod().equalsIgnoreCase(produkt.getKod())) {
+                return false; // produkt już istnieje
             }
         }
-
-        System.out.print("Cena: ");
-        double cena = Double.parseDouble(scanner.nextLine());
-
-        System.out.print("Jednostka: ");
-        String jednostka = scanner.nextLine();
-
-        System.out.print("Opis: ");
-        String opis = scanner.nextLine();
-
-        System.out.print("Kategoria: ");
-        String kategoria = scanner.nextLine();
-
-        System.out.print("Minimalna ilość (powiadomienie): ");
-        int minimum = Integer.parseInt(scanner.nextLine());
-
-        System.out.println("== DOSTAWCA ==");
-        System.out.print("Nazwa dostawcy: ");
-        String nazwaD = scanner.nextLine();
-        System.out.print("Adres: ");
-        String adres = scanner.nextLine();
-        System.out.print("Kontakt: ");
-        String kontakt = scanner.nextLine();
-        Dostawca d = new Dostawca(nazwaD, adres, kontakt);
-
-        Produkt p = new Produkt(nazwa, kod, cena, jednostka, opis, kategoria, d);
-        p.setMinimum(minimum);
-
-        System.out.print("Ilość początkowa: ");
-        p.setIlosc(Integer.parseInt(scanner.nextLine()));
-
-        produkty.add(p);
-        System.out.println("✅ Produkt dodany.");
+        produkty.add(produkt);
+        return true; // dodano
     }
 
     /**

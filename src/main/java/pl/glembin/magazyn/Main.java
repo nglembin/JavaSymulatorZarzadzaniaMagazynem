@@ -45,7 +45,114 @@ public class Main {
             System.out.print("Wybierz opcję: ");
 
             switch (scanner.nextLine()) {
-                case "1" -> magazyn.dodajProdukt(scanner);
+                case "1" -> {
+                    System.out.print("Nazwa: ");
+                    String nazwa = scanner.nextLine().trim();
+                    if (nazwa.isEmpty()) {
+                        System.out.println("❌ Nazwa nie może być pusta!");
+                        break;
+                    }
+
+                    System.out.print("Kod: ");
+                    String kod = scanner.nextLine().trim();
+                    if (kod.isEmpty()) {
+                        System.out.println("❌ Kod nie może być pusty!");
+                        break;
+                    }
+
+                    double cena;
+                    try {
+                        System.out.print("Cena: ");
+                        String cenaInput = scanner.nextLine().trim();
+                        if (cenaInput.isEmpty()) throw new NumberFormatException();
+                        cena = Double.parseDouble(cenaInput);
+                        if (cena <= 0) {
+                            System.out.println("❌ Cena musi być większa niż 0!");
+                            break;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("❌ Nieprawidłowa cena.");
+                        break;
+                    }
+
+                    System.out.print("Jednostka: ");
+                    String jednostka = scanner.nextLine().trim();
+                    if (jednostka.isEmpty()) {
+                        System.out.println("❌ Jednostka nie może być pusta!");
+                        break;
+                    }
+
+                    System.out.print("Opis: ");
+                    String opis = scanner.nextLine().trim();
+
+                    System.out.print("Kategoria: ");
+                    String kategoria = scanner.nextLine().trim();
+                    if (kategoria.isEmpty()) {
+                        System.out.println("❌ Kategoria nie może być pusta!");
+                        break;
+                    }
+
+                    int minimum;
+                    try {
+                        System.out.print("Minimalna ilość (powiadomienie): ");
+                        String minInput = scanner.nextLine().trim();
+                        if (minInput.isEmpty()) throw new NumberFormatException();
+                        minimum = Integer.parseInt(minInput);
+                        if (minimum < 0) {
+                            System.out.println("❌ Minimalna ilość nie może być ujemna!");
+                            break;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("❌ Nieprawidłowa wartość minimalna.");
+                        break;
+                    }
+
+                    System.out.println("== DOSTAWCA ==");
+
+                    System.out.print("Nazwa dostawcy: ");
+                    String nazwaD = scanner.nextLine().trim();
+                    if (nazwaD.isEmpty()) {
+                        System.out.println("❌ Nazwa dostawcy nie może być pusta!");
+                        break;
+                    }
+
+                    System.out.print("Adres: ");
+                    String adres = scanner.nextLine().trim();
+                    if (adres.isEmpty()) {
+                        System.out.println("❌ Adres dostawcy nie może być pusty!");
+                        break;
+                    }
+
+                    System.out.print("Kontakt: ");
+                    String kontakt = scanner.nextLine().trim();
+                    if (kontakt.isEmpty()) {
+                        System.out.println("❌ Kontakt dostawcy nie może być pusty!");
+                        break;
+                    }
+
+                    int ilosc;
+                    try {
+                        System.out.print("Ilość początkowa: ");
+                        String iloscInput = scanner.nextLine().trim();
+                        if (iloscInput.isEmpty()) throw new NumberFormatException();
+                        ilosc = Integer.parseInt(iloscInput);
+                        if (ilosc < 0) {
+                            System.out.println("❌ Ilość nie może być ujemna!");
+                            break;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("❌ Nieprawidłowa ilość.");
+                        break;
+                    }
+
+                    boolean sukces = magazyn.dodajProdukt(nazwa, kod, cena, jednostka, opis, kategoria, minimum, ilosc, nazwaD, adres, kontakt);
+                    if (sukces) {
+                        System.out.println("✅ Produkt dodany.");
+                    } else {
+                        System.out.println("❌ Produkt o takim kodzie już istnieje!");
+                    }
+                }
+
                 case "2" -> magazyn.wyswietlProdukty();
                 case "3" -> magazyn.usunProdukt(scanner);
                 case "4" -> magazyn.zapiszDoPliku();
