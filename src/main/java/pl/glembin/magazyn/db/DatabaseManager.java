@@ -42,15 +42,16 @@ public class DatabaseManager {
         }
     }
 
-    public void dodajProdukt(Produkt p) {
+    public boolean dodajProdukt(Produkt p) {
         String sql = """
-            INSERT INTO produkty (kod, nazwa, cena, jednostka, opis, kategoria, ilosc, minimum, 
-                                  dostawca_nazwa, dostawca_adres, dostawca_kontakt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """;
+        INSERT INTO produkty (kod, nazwa, cena, jednostka, opis, kategoria, ilosc, minimum, 
+                              dostawca_nazwa, dostawca_adres, dostawca_kontakt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    """;
 
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, p.getKod());
             ps.setString(2, p.getNazwa());
             ps.setDouble(3, p.getCena());
@@ -66,9 +67,12 @@ public class DatabaseManager {
             ps.setString(11, d.getKontakt());
 
             ps.executeUpdate();
-            System.out.println("✅ Zapisano do bazy danych.");
+            System.out.println("Zapisano do bazy danych.");
+            return true;
+
         } catch (SQLException e) {
-            System.err.println("❌ Błąd zapisu do bazy: " + e.getMessage());
+            System.err.println("Błąd zapisu do bazy: " + e.getMessage());
+            return false;
         }
     }
 
@@ -100,7 +104,7 @@ public class DatabaseManager {
                 return p;
             }
         } catch (SQLException e) {
-            System.err.println("❌ Błąd podczas wyszukiwania: " + e.getMessage());
+            System.err.println("Błąd podczas wyszukiwania: " + e.getMessage());
         }
         return null;
     }
@@ -134,7 +138,7 @@ public class DatabaseManager {
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ Błąd pobierania produktów: " + e.getMessage());
+            System.err.println("Błąd pobierania produktów: " + e.getMessage());
         }
 
         return lista;
@@ -148,12 +152,12 @@ public class DatabaseManager {
             ps.setString(1, kod);
             int usunieto = ps.executeUpdate();
             if (usunieto > 0) {
-                System.out.println("🗑️ Produkt usunięty z bazy.");
+                System.out.println("Produkt usunięty z bazy.");
             } else {
-                System.out.println("⚠️ Nie znaleziono produktu do usunięcia.");
+                System.out.println("Nie znaleziono produktu do usunięcia.");
             }
         } catch (SQLException e) {
-            System.err.println("❌ Błąd usuwania produktu: " + e.getMessage());
+            System.err.println("Błąd usuwania produktu: " + e.getMessage());
         }
     }
 
@@ -183,9 +187,9 @@ public class DatabaseManager {
             ps.setString(11, p.getKod());
 
             int zmienione = ps.executeUpdate();
-            System.out.println(zmienione > 0 ? "✏️ Zaktualizowano w bazie." : "⚠️ Produkt nie istnieje.");
+            System.out.println(zmienione > 0 ? "Zaktualizowano w bazie." : "Produkt nie istnieje.");
         } catch (SQLException e) {
-            System.err.println("❌ Błąd aktualizacji: " + e.getMessage());
+            System.err.println("Błąd aktualizacji: " + e.getMessage());
         }
     }
 }
