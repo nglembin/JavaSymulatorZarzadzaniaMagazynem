@@ -3,6 +3,10 @@ import pl.glembin.magazyn.utils.Config;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pl.glembin.magazyn.model.*;
+
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +39,8 @@ public class Magazyn {
             }
         }
         produkty.add(produkt);
+        zapiszDoPliku("produkty.json");
+        wykonajKopieZapasowa();
         return true; // dodano
     }
 
@@ -51,7 +57,12 @@ public class Magazyn {
      */
 
     public boolean usunProdukt(String kod) {
-        return produkty.removeIf(p -> p.getKod().equalsIgnoreCase(kod));
+        boolean usunieto = produkty.removeIf(p -> p.getKod().equalsIgnoreCase(kod));
+        if (usunieto) {
+            zapiszDoPliku("produkty.json");
+            wykonajKopieZapasowa(); // <- dodaj backup
+        }
+        return usunieto;
     }
 
     /**
@@ -87,14 +98,26 @@ public class Magazyn {
     }
 
     /**
-     * Wyszukuje produkty pasujące do podanej frazy (nazwa, kod, opis, dostawca).
+     * Wyszukuje produkty pasujące do podanej frazy (nazwa, kod, opis, dostawca). Do wyszukiwania tolowerCase, a nie equalsIgnoreCase żeby jak wpiszemy "lap" wyszukało Laptop
      */
 
-    public List<Produkt> wyszukaj(String fraza) {
+    public List<Produkt> wyszukaj(String fraza, String pole) {
+        String szukana = fraza.toLowerCase();
+
         return produkty.stream()
-                .filter(p -> p.pasujeDoWyszukiwania(fraza))
+                .filter(p -> {
+                    return switch (pole.toLowerCase()) {
+                        case "nazwa" -> p.getNazwa().toLowerCase().contains(szukana);
+                        case "kod" -> p.getKod().toLowerCase().contains(szukana);
+                        case "opis" -> p.getOpis().toLowerCase().contains(szukana);
+                        case "dostawca" -> p.getDostawca() != null &&
+                                p.getDostawca().getNazwa().toLowerCase().contains(szukana);
+                        default -> false;
+                    };
+                })
                 .toList();
     }
+
 
     /**
      * Sortuje listę produktów według wybranego kryterium.
@@ -137,12 +160,15 @@ public class Magazyn {
     /**
      * Przyjmuje dostawę danego produktu, aktualizując jego ilość i zapisując transakcję.
      */
-    public boolean przyjmijDostawe(String kodProduktu, int ilosc) {
+
+    public boolean przyjmijDostawe(String kodProduktu, int ilosc, String dostawca) {
         Produkt produkt = znajdzProdukt(kodProduktu);
         if (produkt == null || ilosc <= 0) return false;
 
         produkt.przyjmij(ilosc);
-        historia.add(new Przyjecie(LocalDate.now(), kodProduktu, ilosc));
+        historia.add(new Przyjecie(LocalDate.now(), kodProduktu, ilosc, dostawca));
+        zapiszDoPliku("produkty.json");
+        wykonajKopieZapasowa();
         return true;
     }
 
@@ -154,14 +180,17 @@ public class Magazyn {
      *   2 – sukces
      */
 
-    public int wydajTowar(String kodProduktu, int ilosc) {
+    public int wydajTowar(String kodProduktu, int ilosc, String odbiorca) {
         Produkt produkt = znajdzProdukt(kodProduktu);
         if (produkt == null) return 0;
         if (!produkt.wydaj(ilosc)) return 1;
 
-        historia.add(new Wydanie(LocalDate.now(), kodProduktu, ilosc));
-        return 2;
+        historia.add(new Wydanie(LocalDate.now(), kodProduktu, ilosc, odbiorca));
+        zapiszDoPliku("produkty.json");
+        wykonajKopieZapasowa();
+        return produkt.czyPonizejMinimum() ? 3 : 2;
     }
+
 
     /**
      * Wyszukuje produkt po jego kodzie.
@@ -181,7 +210,7 @@ public class Magazyn {
     public List<Produkt> znajdzProduktyPonizejMinimum() {
         return produkty.stream()
                 .filter(Produkt::czyPonizejMinimum)
-                .toList(); // Java 16+ lub zamień na .collect(Collectors.toList()) jeśli starsza wersja
+                .toList();
     }
 
     /**
@@ -192,7 +221,6 @@ public class Magazyn {
         for (int i = 0; i < produkty.size(); i++) {
             Produkt p = produkty.get(i);
             if (p.getKod().equalsIgnoreCase(kod)) {
-                // Aktualizacja tylko zmienialnych pól (kod się nie zmienia!)
                 p.setNazwa(nowyStan.getNazwa());
                 p.setCena(nowyStan.getCena());
                 p.setJednostka(nowyStan.getJednostka());
@@ -201,6 +229,8 @@ public class Magazyn {
                 p.setMinimum(nowyStan.getMinimum());
                 p.setIlosc(nowyStan.getIlosc());
                 p.setDostawca(nowyStan.getDostawca());
+                zapiszDoPliku("produkty.json");
+                wykonajKopieZapasowa();
                 return true;
             }
         }
@@ -235,6 +265,67 @@ public class Magazyn {
                 .collect(Collectors.toList());
     }
 
+
+    /**
+     * Filtrowanie produktów
+     */
+
+    public List<Produkt> filtrujPoKategorii(String kategoria) {
+        return produkty.stream()
+                .filter(p -> p.getKategoria().equalsIgnoreCase(kategoria))
+                .toList(); // dla starszych JDK użyj .collect(Collectors.toList())
+    }
+
+    public List<Produkt> filtrujPoIlosci(int minIlosc) {
+        return produkty.stream()
+                .filter(p -> p.getIlosc() >= minIlosc)
+                .toList();
+    }
+
+    public List<Produkt> filtrujPoCenie(double maksCena) {
+        return produkty.stream()
+                .filter(p -> p.getCena() <= maksCena)
+                .toList();
+    }
+
+    /**
+     * Auto zapisy i backupy
+     */
+
+    public void wykonajKopieZapasowa() {
+        File oryginal = new File("produkty.json");
+        File backup = new File("produkty_backup_" + LocalDate.now() + ".json");
+        try {
+            Files.copy(oryginal.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            logger.info("Utworzono kopię zapasową: " + backup.getName());
+        } catch (IOException e) {
+            logger.error("Błąd przy tworzeniu kopii zapasowej", e);
+        }
+    }
+
+    /**
+     * Generuje raport produktów dla danej kategorii i zapisuje do pliku.
+     */
+
+    public void raportProduktowPoKategorii(String kategoria, String nazwaPliku) throws IOException {
+        List<Produkt> wynik = filtrujPoKategorii(kategoria);
+
+        try (PrintWriter writer = new PrintWriter(nazwaPliku)) {
+            writer.println("=== RAPORT PRODUKTÓW W KATEGORII: " + kategoria.toUpperCase() + " ===");
+
+            if (wynik.isEmpty()) {
+                writer.println("Brak produktów w tej kategorii.");
+            } else {
+                for (Produkt p : wynik) {
+                    writer.println(p);
+                    writer.println("--------------------------------------");
+                }
+            }
+
+            writer.println("Data wygenerowania: " + LocalDate.now());
+        }
+    }
+
     /**
      * Metoda pomocnicza do testów jednostkowych – zwraca listę produktów.
      */
@@ -243,3 +334,4 @@ public class Magazyn {
         return new ArrayList<>(produkty); // zwracamy kopię listy
     }
 }
+

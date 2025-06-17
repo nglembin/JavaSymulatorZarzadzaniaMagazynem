@@ -6,6 +6,8 @@ import pl.glembin.magazyn.model.Produkt;
 import pl.glembin.magazyn.model.Transakcja;
 import pl.glembin.magazyn.service.Magazyn;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
@@ -32,7 +34,7 @@ public class Main {
             System.out.println("5. Wczytaj z pliku");
             System.out.println("6. Wyszukaj produkt");
             System.out.println("7. Sortuj produkty");
-            System.out.println("8. Pokaż produkty poniżej minimum");
+            System.out.println("8. Wygeneruj raport produktów z wybranej kategorii do pliku");
             System.out.println("9. Wygeneruj raport do pliku");
             System.out.println("10. Przyjmij dostawę");
             System.out.println("11. Wydaj towar");
@@ -44,6 +46,7 @@ public class Main {
             System.out.println("17. Wczytaj produkt z bazy danych");
             System.out.println("18. Usuń produkt z bazy danych");
             System.out.println("19. Wyświetl wszystkie produkty z bazy");
+            System.out.println("20. Filtruj produkty");
             System.out.println("0. Wyjście");
             System.out.print("Wybierz opcję: ");
 
@@ -160,6 +163,10 @@ public class Main {
                     boolean sukces = magazyn.dodajProdukt(p);
                     if (sukces) {
                         System.out.println("Produkt dodany.");
+                        if (p.czyPonizejMinimum()) {
+                            System.out.println("Uwaga: produkt ma ilość poniżej minimum!");
+                            System.out.println("Ilość: " + p.getIlosc() + " / Minimum: " + p.getMinimum());
+                        }
                     } else {
                         System.out.println("Produkt o takim kodzie już istnieje!");
                     }
@@ -177,14 +184,24 @@ public class Main {
                     System.out.print("Kod produktu do usunięcia: ");
                     String kod = scanner.nextLine();
 
-                    boolean usunieto = magazyn.usunProdukt(kod);
-
-                    if (usunieto) {
-                        System.out.println("Produkt został usunięty.");
-                    } else {
+                    Produkt produkt = magazyn.znajdzProdukt(kod);
+                    if (produkt == null) {
                         System.out.println("Nie znaleziono produktu o podanym kodzie.");
+                        break;
+                    }
+
+                    System.out.println("Znaleziono: " + produkt.getNazwa() + " (" + produkt.getKod() + ")");
+                    System.out.print("Czy na pewno chcesz usunąć ten produkt? (tak/nie): ");
+                    String decyzja = scanner.nextLine().toLowerCase();
+
+                    if (decyzja.equals("tak")) {
+                        boolean usunieto = magazyn.usunProdukt(kod);
+                        System.out.println(usunieto ? "Produkt został usunięty." : "Nie udało się usunąć produktu.");
+                    } else {
+                        System.out.println("Operacja anulowana.");
                     }
                 }
+
                 case "4" -> {
                     System.out.print("Podaj nazwę pliku do zapisu (np. plikA.json): ");
                     String sciezka = scanner.nextLine();
@@ -210,10 +227,18 @@ public class Main {
                     }
                 }
                 case "6" -> {
+                    System.out.println("Po czym chcesz wyszukać? (nazwa / kod / opis / dostawca)");
+                    String pole = scanner.nextLine().trim().toLowerCase();
+
+                    if (!List.of("nazwa", "kod", "opis", "dostawca").contains(pole)) {
+                        System.out.println("Nieprawidłowe pole wyszukiwania.");
+                        break;
+                    }
+
                     System.out.print("Wpisz szukaną frazę: ");
                     String fraza = scanner.nextLine();
 
-                    List<Produkt> znalezione = magazyn.wyszukaj(fraza);
+                    List<Produkt> znalezione = magazyn.wyszukaj(fraza, pole);
                     if (znalezione.isEmpty()) {
                         System.out.println("Nie znaleziono pasujących produktów.");
                     } else {
@@ -224,6 +249,10 @@ public class Main {
                 case "7" -> {
                     System.out.println("Sortuj po: 1-nazwa, 2-kod, 3-cena, 4-ilość");
                     String wybor = scanner.nextLine();
+
+                    System.out.println("Kierunek: 1 - rosnąco, 2 - malejąco");
+                    String kierunek = scanner.nextLine();
+
                     Comparator<Produkt> komparator = switch (wybor) {
                         case "1" -> Produkt.sortujPoNazwie();
                         case "2" -> Produkt.sortujPoKodzie();
@@ -231,23 +260,29 @@ public class Main {
                         case "4" -> Produkt.sortujPoIlosci();
                         default -> null;
                     };
+
                     if (komparator != null) {
+                        if (kierunek.equals("2")) {
+                            komparator = komparator.reversed(); // odwrotna kolejność reversed bo domyslnie jest rosnaco
+                        }
+
                         magazyn.sortujProdukty(komparator);
-                        System.out.println("Posortowano.");
+                        System.out.println("Posortowano:");
                         Produkt.wypiszListe(magazyn.getProdukty());
                     } else {
                         System.out.println("Nieznane kryterium.");
                     }
                 }
                 case "8" -> {
-                    List<Produkt> niskie = magazyn.znajdzNiskieStany();
-                    if (niskie.isEmpty()) {
-                        System.out.println("Wszystkie produkty mają wystarczający stan magazynowy.");
-                    } else {
-                        System.out.println("Produkty poniżej minimalnego stanu:");
-                        for (Produkt p : niskie) {
-                            System.out.println(p.getNazwa() + " (" + p.getIlosc() + " < " + p.getMinimum() + ")");
-                        }
+                    System.out.print("Podaj kategorię do raportu: ");
+                    String kategoria = scanner.nextLine();
+                    String nazwaPliku = "raport_kategoria_" + kategoria.toLowerCase() + ".txt";
+
+                    try {
+                        magazyn.raportProduktowPoKategorii(kategoria, nazwaPliku);
+                        System.out.println("Raport zapisano do pliku: " + nazwaPliku);
+                    } catch (IOException e) {
+                        System.out.println("Błąd podczas zapisu raportu: " + e.getMessage());
                     }
                 }
                 case "9" -> {
@@ -277,7 +312,10 @@ public class Main {
                         break;
                     }
 
-                    boolean sukces = magazyn.przyjmijDostawe(kod, ilosc);
+                    System.out.print("Podaj nazwę dostawcy: ");
+                    String dostawca = scanner.nextLine();
+
+                    boolean sukces = magazyn.przyjmijDostawe(kod, ilosc, dostawca);
                     System.out.println(sukces ? "Przyjęto dostawę." : "Nie znaleziono produktu.");
                 }
                 case "11" -> {
@@ -297,22 +335,33 @@ public class Main {
                         break;
                     }
 
-                    int status = magazyn.wydajTowar(kod, ilosc);
+                    System.out.print("Podaj nazwę odbiorcy: ");
+                    String odbiorca = scanner.nextLine();
+
+                    int status = magazyn.wydajTowar(kod, ilosc, odbiorca);
                     switch (status) {
                         case 0 -> System.out.println("Nie znaleziono produktu.");
-                        case 1 -> System.out.println("Brak wystarczającej ilości.");
+                        case 1 -> System.out.println("Brak wystarczającej ilości na stanie.");
                         case 2 -> System.out.println("Wydano towar.");
+                        case 3 -> {
+                            System.out.println("Wydano towar, ALE UWAGA: ilość poniżej progu minimalnego!");
+                            Produkt p = magazyn.znajdzProdukt(kod);
+                            if (p != null) {
+                                System.out.println("Produkt: " + p.getNazwa() + " – ilość: " + p.getIlosc() + " / minimum: " + p.getMinimum());
+                            }
+                        }
                     }
                 }
                 case "12" -> {
-                    List<Produkt> ponizejMinimum = magazyn.znajdzProduktyPonizejMinimum();
-                    if (ponizejMinimum.isEmpty()) {
-                        System.out.println("Wszystkie produkty powyżej minimalnego stanu.");
+                    System.out.println("Produkty wymagające uzupełnienia:");
+                    List<Produkt> doUzupelnienia = magazyn.getProdukty().stream()
+                            .filter(Produkt::czyPonizejMinimum)
+                            .toList();
+
+                    if (doUzupelnienia.isEmpty()) {
+                        System.out.println("Wszystkie produkty mają wystarczającą ilość.");
                     } else {
-                        System.out.println("Produkty poniżej minimalnej ilości:");
-                        for (Produkt p : ponizejMinimum) {
-                            System.out.println(p.getNazwa() + " (" + p.getIlosc() + "/" + p.getMinimum() + ")");
-                        }
+                        Produkt.wypiszListe(doUzupelnienia);
                     }
                 }
                 case "13" -> {
@@ -533,6 +582,44 @@ public class Main {
                     List<Produkt> lista = db.pobierzWszystkieProdukty();
                     if (lista.isEmpty()) System.out.println("Brak produktów w bazie.");
                     else lista.forEach(System.out::println);
+                }
+                case "20" -> {
+                    System.out.println("Filtruj po: 1 - kategoria, 2 - cena max, 3 - minimalna ilość");
+                    String wybor = scanner.nextLine();
+
+                    List<Produkt> wynik = new ArrayList<>();
+                    switch (wybor) {
+                        case "1" -> {
+                            System.out.print("Podaj kategorię: ");
+                            String kat = scanner.nextLine();
+                            wynik = magazyn.filtrujPoKategorii(kat);
+                        }
+                        case "2" -> {
+                            System.out.print("Podaj maksymalną cenę: ");
+                            try {
+                                double cena = Double.parseDouble(scanner.nextLine());
+                                wynik = magazyn.filtrujPoCenie(cena);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Niepoprawna liczba.");
+                            }
+                        }
+                        case "3" -> {
+                            System.out.print("Podaj minimalną ilość: ");
+                            try {
+                                int ilosc = Integer.parseInt(scanner.nextLine());
+                                wynik = magazyn.filtrujPoIlosci(ilosc);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Niepoprawna liczba.");
+                            }
+                        }
+                        default -> System.out.println("Nieznany wybór.");
+                    }
+
+                    if (!wynik.isEmpty()) {
+                        Produkt.wypiszTabelarycznie(wynik);
+                    } else {
+                        System.out.println("Brak wyników.");
+                    }
                 }
                 case "0" -> {
                     System.out.println("Do widzenia!");

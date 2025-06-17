@@ -1,6 +1,7 @@
 package pl.glembin.magazyn.model;
 
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Klasa reprezentująca produkt w systemie magazynowym.
@@ -91,6 +92,17 @@ public class Produkt {
             System.out.println("--------------------------");
         }
     }
+
+    public static void wypiszTabelarycznie(List<Produkt> lista) {
+        System.out.printf("%-10s %-20s %-8s %-8s %-10s %-10s%n", "Kod", "Nazwa", "Cena", "Ilość", "Kategoria", "Dostawca");
+        System.out.println("---------------------------------------------------------------------------");
+        for (Produkt p : lista) {
+            System.out.printf("%-10s %-20s %-8.2f %-8d %-10s %-10s%n",
+                    p.getKod(), p.getNazwa(), p.getCena(), p.getIlosc(), p.getKategoria(),
+                    p.getDostawca().getNazwa());
+        }
+    }
+
 
     // Czy produkt poniżej minimum?
     public boolean czyPonizejMinimum() {
