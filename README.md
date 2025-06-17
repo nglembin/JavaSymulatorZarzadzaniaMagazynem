@@ -43,10 +43,6 @@ src/
 ## 🛠️ Uruchomienie
 
 1. Sklonuj repozytorium:
-   ```bash
-   git clone https://github.com/twoj-login/system-magazynowy.git
-   cd system-magazynowy
-
 2. Uruchom aplikację z klasy Main
 
 # 🧪 Testowanie
