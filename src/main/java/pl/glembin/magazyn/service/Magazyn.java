@@ -137,18 +137,21 @@ public class Magazyn {
     /**
      * Przyjmuje dostawę danego produktu, aktualizując jego ilość i zapisując transakcję.
      */
-
     public boolean przyjmijDostawe(String kodProduktu, int ilosc) {
         Produkt produkt = znajdzProdukt(kodProduktu);
         if (produkt == null || ilosc <= 0) return false;
 
         produkt.przyjmij(ilosc);
-        historia.add(new Transakcja(LocalDate.now(), kodProduktu, ilosc, TypTransakcji.PRZYJECIE));
+        historia.add(new Przyjecie(LocalDate.now(), kodProduktu, ilosc));
         return true;
     }
 
     /**
-     * Wydaje towar
+     * Wydaje towar z magazynu, aktualizując stan i zapisując transakcję.
+     * Zwraca:
+     *   0 – nie znaleziono produktu
+     *   1 – za mało na stanie
+     *   2 – sukces
      */
 
     public int wydajTowar(String kodProduktu, int ilosc) {
@@ -156,7 +159,7 @@ public class Magazyn {
         if (produkt == null) return 0;
         if (!produkt.wydaj(ilosc)) return 1;
 
-        historia.add(new Transakcja(LocalDate.now(), kodProduktu, ilosc, TypTransakcji.WYDANIE));
+        historia.add(new Wydanie(LocalDate.now(), kodProduktu, ilosc));
         return 2;
     }
 

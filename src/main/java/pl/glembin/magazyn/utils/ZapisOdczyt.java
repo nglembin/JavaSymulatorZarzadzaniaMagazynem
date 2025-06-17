@@ -15,9 +15,9 @@ public class ZapisOdczyt {
     public static void zapisz(List<Produkt> produkty) {
         try {
             mapper.writeValue(plik, produkty);
-            System.out.println("💾 Dane zapisane.");
+            System.out.println("Dane zapisane.");
         } catch (IOException e) {
-            System.out.println("❌ Błąd zapisu: " + e.getMessage());
+            System.out.println("Błąd zapisu: " + e.getMessage());
         }
     }
 
@@ -26,7 +26,7 @@ public class ZapisOdczyt {
             if (!plik.exists()) return List.of();
             return mapper.readValue(plik, new TypeReference<>() {});
         } catch (IOException e) {
-            System.out.println("❌ Błąd odczytu: " + e.getMessage());
+            System.out.println("Błąd odczytu: " + e.getMessage());
             return List.of();
         }
     }

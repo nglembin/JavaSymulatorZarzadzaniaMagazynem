@@ -1,8 +1,8 @@
 package pl.glembin.magazyn.model;
 
 /**
- * Typ wyliczeniowy reprezentujący rodzaj transakcji magazynowej.
- * Może to być PRZYJĘCIE lub WYDANIE.
+ * Enum reprezentujący typ transakcji magazynowej.
+ * Dostępne wartości: PRZYJECIE i WYDANIE.
  */
 
 public enum TypTransakcji {

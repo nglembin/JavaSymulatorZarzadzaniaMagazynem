@@ -296,6 +296,7 @@ public class Main {
                         System.out.println("Niepoprawna liczba.");
                         break;
                     }
+
                     int status = magazyn.wydajTowar(kod, ilosc);
                     switch (status) {
                         case 0 -> System.out.println("Nie znaleziono produktu.");
