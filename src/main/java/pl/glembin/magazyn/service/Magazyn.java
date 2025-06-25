@@ -330,7 +330,7 @@ public class Magazyn {
      */
 
     public List<Produkt> getProdukty2() {
-        return new ArrayList<>(produkty); // zwracamy kopię listy
+        return(produkty); // zwracamy liste
     }
 }
 
