@@ -1,22 +1,22 @@
 package pl.glembin.magazyn.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 
-/**
- * Klasa reprezentująca transakcję wydania produktu z magazynu.
- * Zawiera informacje o dacie, kodzie produktu, ilości oraz nazwie odbiorcy.
- * Automatycznie generuje dokument WZ w formie pliku tekstowego.
- */
 public class Wydanie extends Transakcja {
+
+    private static final Logger logger = LoggerFactory.getLogger(Wydanie.class);
 
     private String odbiorca;
 
     public Wydanie(LocalDate data, String kodProduktu, int ilosc, String odbiorca) {
         super(data, kodProduktu, ilosc, TypTransakcji.WYDANIE);
         this.odbiorca = odbiorca;
-        zapiszDokumentWZ(); // automatyczne generowanie WZ
+        zapiszDokumentWZ();
     }
 
     @Override
@@ -33,7 +33,7 @@ public class Wydanie extends Transakcja {
             writer.write("Ilość: " + ilosc + "\n");
             writer.write("Odbiorca: " + odbiorca + "\n");
         } catch (IOException e) {
-            System.err.println("Nie udało się zapisać dokumentu WZ: " + e.getMessage());
+            logger.error("Nie udało się zapisać dokumentu WZ: {}", e.getMessage());
         }
     }
 }

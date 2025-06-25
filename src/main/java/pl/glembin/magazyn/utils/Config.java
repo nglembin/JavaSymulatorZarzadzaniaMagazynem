@@ -7,6 +7,7 @@ import java.util.Properties;
 /**
  * Klasa pomocnicza do ładowania konfiguracji z pliku config.properties.
  */
+
 public class Config {
     private static final Properties properties = new Properties();
 

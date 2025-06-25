@@ -1,5 +1,7 @@
 package pl.glembin.magazyn.db;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.glembin.magazyn.model.Dostawca;
 import pl.glembin.magazyn.model.Produkt;
 
@@ -7,11 +9,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Klasa zarządzająca połączeniem z bazą danych SQLite oraz operacjami CRUD dla produktów.
- */
 public class DatabaseManager {
+
     private static final String URL = "jdbc:sqlite:magazyn.db";
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
 
     public DatabaseManager() {
         utworzTabeleJesliNieIstnieje();
@@ -37,8 +38,9 @@ public class DatabaseManager {
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
+            logger.info("Tabele sprawdzone lub utworzone.");
         } catch (SQLException e) {
-            System.err.println("❌ Błąd tworzenia tabeli: " + e.getMessage());
+            logger.error("Błąd tworzenia tabeli: {}", e.getMessage());
         }
     }
 
@@ -67,11 +69,11 @@ public class DatabaseManager {
             ps.setString(11, d.getKontakt());
 
             ps.executeUpdate();
-            System.out.println("Zapisano do bazy danych.");
+            logger.info("Zapisano produkt do bazy: {}", p.getKod());
             return true;
 
         } catch (SQLException e) {
-            System.err.println("Błąd zapisu do bazy: " + e.getMessage());
+            logger.error("Błąd zapisu do bazy: {}", e.getMessage());
             return false;
         }
     }
@@ -104,7 +106,7 @@ public class DatabaseManager {
                 return p;
             }
         } catch (SQLException e) {
-            System.err.println("Błąd podczas wyszukiwania: " + e.getMessage());
+            logger.error("Błąd podczas wyszukiwania produktu {}: {}", kod, e.getMessage());
         }
         return null;
     }
@@ -137,8 +139,10 @@ public class DatabaseManager {
                 lista.add(p);
             }
 
+            logger.info("Pobrano {} produktów z bazy.", lista.size());
+
         } catch (SQLException e) {
-            System.err.println("Błąd pobierania produktów: " + e.getMessage());
+            logger.error("Błąd pobierania produktów: {}", e.getMessage());
         }
 
         return lista;
@@ -152,12 +156,12 @@ public class DatabaseManager {
             ps.setString(1, kod);
             int usunieto = ps.executeUpdate();
             if (usunieto > 0) {
-                System.out.println("Produkt usunięty z bazy.");
+                logger.info("Produkt {} usunięty z bazy.", kod);
             } else {
-                System.out.println("Nie znaleziono produktu do usunięcia.");
+                logger.warn("Nie znaleziono produktu {} do usunięcia.", kod);
             }
         } catch (SQLException e) {
-            System.err.println("Błąd usuwania produktu: " + e.getMessage());
+            logger.error("Błąd usuwania produktu {}: {}", kod, e.getMessage());
         }
     }
 
@@ -171,6 +175,7 @@ public class DatabaseManager {
 
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, p.getNazwa());
             ps.setDouble(2, p.getCena());
             ps.setString(3, p.getJednostka());
@@ -187,9 +192,14 @@ public class DatabaseManager {
             ps.setString(11, p.getKod());
 
             int zmienione = ps.executeUpdate();
-            System.out.println(zmienione > 0 ? "Zaktualizowano w bazie." : "Produkt nie istnieje.");
+            if (zmienione > 0) {
+                logger.info("Zaktualizowano produkt w bazie: {}", p.getKod());
+            } else {
+                logger.warn("Nie znaleziono produktu do aktualizacji: {}", p.getKod());
+            }
+
         } catch (SQLException e) {
-            System.err.println("Błąd aktualizacji: " + e.getMessage());
+            logger.error("Błąd aktualizacji produktu {}: {}", p.getKod(), e.getMessage());
         }
     }
 }

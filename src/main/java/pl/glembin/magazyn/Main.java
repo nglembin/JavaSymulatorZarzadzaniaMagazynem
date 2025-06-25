@@ -177,9 +177,13 @@ public class Main {
                     if (lista.isEmpty()) {
                         System.out.println("Brak produktów.");
                     } else {
-                        Produkt.wypiszListe(lista);
+                        for (Produkt p : lista) {
+                            System.out.println(p.formatujDoListy());
+                            System.out.println("--------------------------");
+                        }
                     }
                 }
+
                 case "3" -> {
                     System.out.print("Kod produktu do usunięcia: ");
                     String kod = scanner.nextLine();
@@ -247,7 +251,7 @@ public class Main {
                     }
                 }
                 case "7" -> {
-                    System.out.println("Sortuj po: 1-nazwa, 2-kod, 3-cena, 4-ilość");
+                    System.out.println("Sortuj po: 1 - nazwa, 2 - kod, 3 - cena, 4 - ilość");
                     String wybor = scanner.nextLine();
 
                     System.out.println("Kierunek: 1 - rosnąco, 2 - malejąco");
@@ -262,17 +266,21 @@ public class Main {
                     };
 
                     if (komparator != null) {
-                        if (kierunek.equals("2")) {
-                            komparator = komparator.reversed(); // odwrotna kolejność reversed bo domyslnie jest rosnaco
+                        if ("2".equals(kierunek)) {
+                            komparator = komparator.reversed();
                         }
 
                         magazyn.sortujProdukty(komparator);
                         System.out.println("Posortowano:");
-                        Produkt.wypiszListe(magazyn.getProdukty());
+                        for (Produkt p : magazyn.getProdukty()) {
+                            System.out.println(p.formatujDoListy());
+                            System.out.println("--------------------------");
+                        }
                     } else {
                         System.out.println("Nieznane kryterium.");
                     }
                 }
+
                 case "8" -> {
                     System.out.print("Podaj kategorię do raportu: ");
                     String kategoria = scanner.nextLine();
@@ -361,7 +369,10 @@ public class Main {
                     if (doUzupelnienia.isEmpty()) {
                         System.out.println("Wszystkie produkty mają wystarczającą ilość.");
                     } else {
-                        Produkt.wypiszListe(doUzupelnienia);
+                        for (Produkt p : doUzupelnienia) {
+                            System.out.println(p.formatujDoListy());
+                            System.out.println("--------------------------");
+                        }
                     }
                 }
                 case "13" -> {
@@ -616,7 +627,7 @@ public class Main {
                     }
 
                     if (!wynik.isEmpty()) {
-                        Produkt.wypiszTabelarycznie(wynik);
+                        System.out.println(Produkt.formatujTabelarycznie(wynik));
                     } else {
                         System.out.println("Brak wyników.");
                     }

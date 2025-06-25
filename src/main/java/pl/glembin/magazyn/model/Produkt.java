@@ -77,31 +77,26 @@ public class Produkt {
         return Comparator.comparingInt(Produkt::getIlosc);
     }
 
-    // Wyszukiwanie
-    public boolean pasujeDoWyszukiwania(String fraza) {
-        fraza = fraza.toLowerCase();
-        return nazwa.toLowerCase().contains(fraza)
-                || kod.toLowerCase().contains(fraza)
-                || opis.toLowerCase().contains(fraza)
-                || (dostawca != null && dostawca.getNazwa().toLowerCase().contains(fraza));
+    public String formatujDoListy() {
+        return String.format("Produkt: %s (%s) - %.2f zł/%s\nOpis: %s\nKategoria: %s\nIlość: %d\nMinimum: %d\nDostawca: %s\n",
+                nazwa, kod, cena, jednostka, opis, kategoria, ilosc, minimum,
+                dostawca != null ? dostawca.getNazwa() : "brak");
     }
 
-    public static void wypiszListe(Iterable<Produkt> lista) {
-        for (Produkt p : lista) {
-            System.out.println(p);
-            System.out.println("--------------------------");
-        }
-    }
 
-    public static void wypiszTabelarycznie(List<Produkt> lista) {
-        System.out.printf("%-10s %-20s %-8s %-8s %-10s %-10s%n", "Kod", "Nazwa", "Cena", "Ilość", "Kategoria", "Dostawca");
-        System.out.println("---------------------------------------------------------------------------");
+    public static String formatujTabelarycznie(List<Produkt> lista) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%-10s %-20s %-8s %-8s %-12s %-15s%n", "Kod", "Nazwa", "Cena", "Ilość", "Kategoria", "Dostawca"));
+        sb.append("--------------------------------------------------------------------------------\n");
+
         for (Produkt p : lista) {
-            System.out.printf("%-10s %-20s %-8.2f %-8d %-10s %-10s%n",
+            sb.append(String.format("%-10s %-20s %-8.2f %-8d %-12s %-15s%n",
                     p.getKod(), p.getNazwa(), p.getCena(), p.getIlosc(), p.getKategoria(),
-                    p.getDostawca().getNazwa());
+                    (p.getDostawca() != null ? p.getDostawca().getNazwa() : "brak")));
         }
+        return sb.toString();
     }
+
 
 
     // Czy produkt poniżej minimum?

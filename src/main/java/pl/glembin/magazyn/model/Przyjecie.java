@@ -1,5 +1,8 @@
 package pl.glembin.magazyn.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,6 +15,7 @@ import java.time.LocalDate;
 
 public class Przyjecie extends Transakcja {
 
+    private static final Logger logger = LoggerFactory.getLogger(Przyjecie.class);
     private String dostawca;
 
     public Przyjecie(LocalDate data, String kodProduktu, int ilosc, String dostawca) {
@@ -34,7 +38,7 @@ public class Przyjecie extends Transakcja {
             writer.write("Ilość: " + ilosc + "\n");
             writer.write("Dostawca: " + dostawca + "\n");
         } catch (IOException e) {
-            System.err.println("❌ Nie udało się zapisać dokumentu PZ: " + e.getMessage());
+            logger.error("Nie udało się zapisać dokumentu PZ: {}", e.getMessage());
         }
     }
 }
