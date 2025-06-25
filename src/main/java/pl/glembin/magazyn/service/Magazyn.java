@@ -1,5 +1,4 @@
 package pl.glembin.magazyn.service;
-import pl.glembin.magazyn.utils.Config;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pl.glembin.magazyn.model.*;
